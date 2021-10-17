@@ -1,0 +1,1654 @@
+---
+layout: default
+---
+
+<div id="toc-header"><span class="header">Contents </span><i class="fa fa-fw hide-btn" title="Hide ToC"></i><i class="fa fa-fw fa-refresh" title="Reload ToC"></i><i class="fa fa-fw fa-cog" title="ToC settings"></i></div>
+<div id="toc" class="toc"><ul class="toc-item"><li><span><i class="fa fa-fw"></i><a href="#Introduction" data-toc-modified-id="Introduction-1"><span class="toc-item-num">1&nbsp;&nbsp;</span>Introduction</a></span></li><li><span><i class="fa fa-fw fa-caret-down"></i><a href="#Prepare-the-data" data-toc-modified-id="Prepare-the-data-2"><span class="toc-item-num">2&nbsp;&nbsp;</span>Prepare the data</a></span><ul class="toc-item"><li><span><i class="fa fa-fw"></i><a href="#EDA" data-toc-modified-id="EDA-2.1"><span class="toc-item-num">2.1&nbsp;&nbsp;</span>EDA</a></span></li></ul></li><li><span><i class="fa fa-fw fa-caret-down"></i><a href="#Simple-Neural-Network" data-toc-modified-id="Simple-Neural-Network-3"><span class="toc-item-num">3&nbsp;&nbsp;</span>Simple Neural Network</a></span><ul class="toc-item"><li><span><i class="fa fa-fw"></i><a href="#Build-and-train" data-toc-modified-id="Build-and-train-3.1"><span class="toc-item-num">3.1&nbsp;&nbsp;</span>Build and train</a></span></li><li><span><i class="fa fa-fw"></i><a href="#Predict" data-toc-modified-id="Predict-3.2"><span class="toc-item-num">3.2&nbsp;&nbsp;</span>Predict</a></span></li></ul></li><li><span><i class="fa fa-fw fa-caret-down"></i><a href="#Convolutional-Neural-Network" data-toc-modified-id="Convolutional-Neural-Network-4"><span class="toc-item-num">4&nbsp;&nbsp;</span>Convolutional Neural Network</a></span><ul class="toc-item"><li><span><i class="fa fa-fw"></i><a href="#Reload-the-data" data-toc-modified-id="Reload-the-data-4.1"><span class="toc-item-num">4.1&nbsp;&nbsp;</span>Reload the data</a></span></li><li><span><i class="fa fa-fw"></i><a href="#Build-and-train" data-toc-modified-id="Build-and-train-4.2"><span class="toc-item-num">4.2&nbsp;&nbsp;</span>Build and train</a></span></li><li><span><i class="fa fa-fw"></i><a href="#Predict" data-toc-modified-id="Predict-4.3"><span class="toc-item-num">4.3&nbsp;&nbsp;</span>Predict</a></span></li></ul></li><li><span><i class="fa fa-fw"></i><a href="#Conclusion" data-toc-modified-id="Conclusion-5"><span class="toc-item-num">5&nbsp;&nbsp;</span>Conclusion</a></span></li><li><span><i class="fa fa-fw"></i><a href="#References" data-toc-modified-id="References-6"><span class="toc-item-num">6&nbsp;&nbsp;</span>References</a></span></li></ul></div>
+<body>
+  <div tabindex="-1" id="notebook" class="border-box-sizing">
+    <div class="container" id="notebook-container">
+
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Introduction">Introduction<a class="anchor-link" href="#Introduction"></a></h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Test and training data with their associated labels have been acquired from an academic dataset (not available in this repo due to size &gt;700MB). The actual content of these datasets is not entirely certain, but likely to be small image data labelled into several categories. The goal is to build neural network models with PyTorch that classify the data to the labels.<br>
+Initially, a simple neural network is built, followed by a convolutional neural network. These are run here on a CPU, but the code is written to run on a GPU where available.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Prepare-the-data">Prepare the data<a class="anchor-link" href="#Prepare-the-data"></a></h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[1]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
+<span class="kn">import</span> <span class="nn">torch.nn.functional</span> <span class="k">as</span> <span class="nn">F</span>
+<span class="kn">import</span> <span class="nn">torch.optim</span> <span class="k">as</span> <span class="nn">optim</span>
+
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[2]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Load the data</span>
+<span class="n">train_data</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;train_data_2&#39;</span><span class="p">)</span>
+<span class="n">test_data</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;test_data_2&#39;</span><span class="p">)</span>
+
+<span class="n">train_labels</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;train_labels_2&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">long</span><span class="p">()</span>
+<span class="n">test_labels</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;test_labels_2&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">long</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="EDA">EDA<a class="anchor-link" href="#EDA"></a></h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[3]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Check the shape of the data</span>
+<span class="n">train_data</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">test_data</span><span class="o">.</span><span class="n">shape</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[3]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>(torch.Size([50000, 3, 32, 32]), torch.Size([10000, 3, 32, 32]))</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The data appears to be colour images (3 channel) of 32x32 pixels. We can test this by plotting a sample.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[4]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="n">sample_num</span><span class="o">=</span><span class="mi">141</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;The Corresponding Label is: </span><span class="si">{</span><span class="n">train_labels</span><span class="p">[</span><span class="n">sample_num</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">train_data</span><span class="p">[</span><span class="n">sample_num</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;nipy_spectral&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>The Corresponding Label is: 7
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+
+
+<div class="output_png output_subarea ">
+<img src="data:image/png;base64,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
+"
+>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>This is clearly an image of a horse, despite being unable to find the exact colourmap to a make it look natural. It is worth examining the labels to have an idea of how many categories this data is to be classified into.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[5]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Find the min and max values of the labels</span>
+<span class="nb">min</span><span class="p">(</span><span class="n">train_labels</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">train_labels</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[5]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>(tensor(0), tensor(9))</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>There appear to be 10 output categories for this data, so the neural network should have 10 outputs.
+Additionally, the data needs to be flattened before use in the neural network.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[6]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Flatten data tensors</span>
+<span class="n">train_data</span> <span class="o">=</span> <span class="n">train_data</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">train_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">train_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">train_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">train_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+<span class="n">test_data</span> <span class="o">=</span> <span class="n">test_data</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">test_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">test_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">test_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">test_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[7]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Check data shapes and types are correct for PyTorch</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">train_data</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">test_data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">train_data</span><span class="o">.</span><span class="n">type</span><span class="p">(),</span> <span class="n">test_data</span><span class="o">.</span><span class="n">type</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">train_labels</span><span class="o">.</span><span class="n">type</span><span class="p">(),</span> <span class="n">test_labels</span><span class="o">.</span><span class="n">type</span><span class="p">())</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>torch.Size([50000, 3072]) torch.Size([10000, 3072])
+torch.FloatTensor torch.FloatTensor
+torch.LongTensor torch.LongTensor
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Simple-Neural-Network">Simple Neural Network<a class="anchor-link" href="#Simple-Neural-Network"></a></h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Build-and-train">Build and train<a class="anchor-link" href="#Build-and-train"></a></h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[8]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Define the parameters of the simple neural network</span>
+<span class="k">class</span> <span class="nc">Simple_NN</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_features</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fc1</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">n_features</span><span class="p">,</span> <span class="mi">256</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fc2</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="mi">128</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fc3</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="mi">64</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fc4</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fc1</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="c1"># ReLU activation function used for hidden layers</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fc2</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fc3</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+        <span class="c1"># Log softmax is an activation function that normalizes the category scores, and the log also increases penalty of incorrect classification</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">log_softmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fc4</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dim</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">x</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[9]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Push processing onto GPU if available</span>
+<span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">():</span>
+    <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cuda:0&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;running on the GPU&quot;</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;running on the CPU&quot;</span><span class="p">)</span>
+
+<span class="n">net</span> <span class="o">=</span> <span class="n">Simple_NN</span><span class="p">(</span><span class="n">n_features</span> <span class="o">=</span> <span class="mi">3072</span><span class="p">)</span>
+<span class="n">net</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>running on the CPU
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[9]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>Simple_NN(
+  (fc1): Linear(in_features=3072, out_features=256, bias=True)
+  (fc2): Linear(in_features=256, out_features=128, bias=True)
+  (fc3): Linear(in_features=128, out_features=64, bias=True)
+  (fc4): Linear(in_features=64, out_features=10, bias=True)
+)</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[10]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Define loss function and optimizer to use</span>
+<span class="n">loss_function</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">CrossEntropyLoss</span><span class="p">()</span>
+<span class="n">optimizer</span> <span class="o">=</span>  <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[11]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">epochs</span> <span class="o">=</span> <span class="mi">20</span>
+<span class="n">BATCH_SIZE</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span> <span class="p">(</span><span class="n">epochs</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">train_data</span><span class="p">),</span> <span class="n">BATCH_SIZE</span><span class="p">)):</span> <span class="c1"># Use tqdm to show progress bars</span>
+        <span class="c1"># Batch the data</span>
+        <span class="n">batch_data</span> <span class="o">=</span> <span class="n">train_data</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">BATCH_SIZE</span><span class="p">]</span>
+        <span class="n">batch_labels</span> <span class="o">=</span> <span class="n">train_labels</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">BATCH_SIZE</span><span class="p">]</span>
+        <span class="n">batch_data</span> <span class="o">=</span> <span class="n">batch_data</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">batch_labels</span> <span class="o">=</span> <span class="n">batch_labels</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+        
+        <span class="n">net</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>  <span class="c1"># Set gradients to 0 before loss calculation</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">net</span><span class="p">(</span><span class="n">batch_data</span><span class="p">)</span>  <span class="c1"># Pass in the reshaped batch</span>
+        
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">loss_function</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">batch_labels</span><span class="p">)</span>  <span class="c1"># Calculate the loss value</span>
+        <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>  <span class="c1"># Apply the loss backwards through the network&#39;s parameters</span>
+        <span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>  <span class="c1"># Optimize weights to account for loss/gradients</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="n">loss</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>100%|██████████| 500/500 [00:06&lt;00:00, 83.16it/s]
+  2%|▏         | 8/500 [00:00&lt;00:06, 76.35it/s]</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>tensor(1.8367, grad_fn=&lt;NllLossBackward&gt;)
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>100%|██████████| 500/500 [00:05&lt;00:00, 87.93it/s]
+  2%|▏         | 8/500 [00:00&lt;00:06, 78.84it/s]</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>tensor(1.7420, grad_fn=&lt;NllLossBackward&gt;)
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>100%|██████████| 500/500 [00:05&lt;00:00, 90.39it/s]
+  1%|          | 6/500 [00:00&lt;00:08, 58.93it/s]</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>tensor(1.7305, grad_fn=&lt;NllLossBackward&gt;)
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>100%|██████████| 500/500 [00:05&lt;00:00, 89.78it/s]
+  1%|          | 6/500 [00:00&lt;00:08, 58.24it/s]</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>tensor(1.6846, grad_fn=&lt;NllLossBackward&gt;)
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>100%|██████████| 500/500 [00:05&lt;00:00, 90.21it/s]
+  2%|▏         | 9/500 [00:00&lt;00:05, 83.48it/s]</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>tensor(1.6278, grad_fn=&lt;NllLossBackward&gt;)
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>100%|██████████| 500/500 [00:05&lt;00:00, 87.33it/s]
+  1%|          | 6/500 [00:00&lt;00:08, 57.46it/s]</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>tensor(1.5544, grad_fn=&lt;NllLossBackward&gt;)
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>100%|██████████| 500/500 [00:05&lt;00:00, 84.05it/s]
+  2%|▏         | 9/500 [00:00&lt;00:05, 83.35it/s]</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>tensor(1.5473, grad_fn=&lt;NllLossBackward&gt;)
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>100%|██████████| 500/500 [00:05&lt;00:00, 87.51it/s]
+  2%|▏         | 8/500 [00:00&lt;00:06, 75.23it/s]</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>tensor(1.4593, grad_fn=&lt;NllLossBackward&gt;)
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>100%|██████████| 500/500 [00:05&lt;00:00, 88.84it/s]
+  2%|▏         | 9/500 [00:00&lt;00:05, 83.62it/s]</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>tensor(1.4442, grad_fn=&lt;NllLossBackward&gt;)
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>100%|██████████| 500/500 [00:05&lt;00:00, 90.25it/s]
+  2%|▏         | 9/500 [00:00&lt;00:05, 86.85it/s]</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>tensor(1.3929, grad_fn=&lt;NllLossBackward&gt;)
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>100%|██████████| 500/500 [00:05&lt;00:00, 91.01it/s]
+  2%|▏         | 9/500 [00:00&lt;00:05, 89.70it/s]</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>tensor(1.3733, grad_fn=&lt;NllLossBackward&gt;)
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>100%|██████████| 500/500 [00:05&lt;00:00, 90.71it/s]
+  2%|▏         | 9/500 [00:00&lt;00:06, 81.30it/s]</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>tensor(1.3148, grad_fn=&lt;NllLossBackward&gt;)
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>100%|██████████| 500/500 [00:05&lt;00:00, 88.11it/s]
+  1%|▏         | 7/500 [00:00&lt;00:07, 69.85it/s]</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>tensor(1.3019, grad_fn=&lt;NllLossBackward&gt;)
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>100%|██████████| 500/500 [00:06&lt;00:00, 82.11it/s]
+  2%|▏         | 8/500 [00:00&lt;00:06, 75.97it/s]</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>tensor(1.2390, grad_fn=&lt;NllLossBackward&gt;)
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>100%|██████████| 500/500 [00:05&lt;00:00, 89.74it/s]
+  2%|▏         | 9/500 [00:00&lt;00:05, 86.73it/s]</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>tensor(1.2757, grad_fn=&lt;NllLossBackward&gt;)
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>100%|██████████| 500/500 [00:05&lt;00:00, 88.73it/s]
+  1%|          | 6/500 [00:00&lt;00:08, 58.26it/s]</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>tensor(1.2307, grad_fn=&lt;NllLossBackward&gt;)
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>100%|██████████| 500/500 [00:05&lt;00:00, 89.81it/s]
+  2%|▏         | 8/500 [00:00&lt;00:06, 77.53it/s]</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>tensor(1.1659, grad_fn=&lt;NllLossBackward&gt;)
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>100%|██████████| 500/500 [00:06&lt;00:00, 75.67it/s]
+  2%|▏         | 9/500 [00:00&lt;00:05, 86.37it/s]</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>tensor(1.1537, grad_fn=&lt;NllLossBackward&gt;)
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>100%|██████████| 500/500 [00:05&lt;00:00, 89.18it/s]
+  2%|▏         | 8/500 [00:00&lt;00:06, 77.86it/s]</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>tensor(1.1802, grad_fn=&lt;NllLossBackward&gt;)
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>100%|██████████| 500/500 [00:05&lt;00:00, 86.73it/s]</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>tensor(1.1142, grad_fn=&lt;NllLossBackward&gt;)
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Predict">Predict<a class="anchor-link" href="#Predict"></a></h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[12]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Use the model to predict from the test set</span>
+<span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+    <span class="n">predicted</span> <span class="o">=</span> <span class="n">net</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">test_data</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">))</span>
+    <span class="n">predicted_classes</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">predicted</span><span class="p">,</span> <span class="n">dim</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
+    
+    <span class="c1"># The model seems to predict fairly well but still makes some mistakes</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">predicted_classes</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">10</span><span class="p">])</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">test_labels</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">10</span><span class="p">])</span>
+    
+<span class="c1"># Push data back onto CPU for further analysis</span>
+<span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s1">&#39;cpu&#39;</span><span class="p">)</span>
+<span class="n">predicted_classes</span> <span class="o">=</span> <span class="n">predicted_classes</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+<span class="n">test_labels</span> <span class="o">=</span> <span class="n">test_labels</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>tensor([4, 9, 8, 0, 4, 6, 3, 6, 3, 1])
+tensor([3, 8, 8, 0, 6, 6, 1, 6, 3, 1])
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[13]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Find accuracy metric for prediction on test set</span>
+<span class="n">correct</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">predicted_classes</span><span class="p">)):</span>
+
+    <span class="k">if</span> <span class="n">predicted_classes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">test_labels</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+        <span class="n">correct</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">total</span> <span class="o">+=</span> <span class="mi">1</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Accuracy: &quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">correct</span><span class="o">/</span><span class="n">total</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Accuracy:  0.504
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>This model has given 50% accuracy. This can be compared to a convolutional model to see if this can be improved.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Convolutional-Neural-Network">Convolutional Neural Network<a class="anchor-link" href="#Convolutional-Neural-Network"></a></h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Reload-the-data">Reload the data<a class="anchor-link" href="#Reload-the-data"></a></h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[14]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># As the data was previously converted to the long format, this loses 2d spatial information. The data is therefore reloaded</span>
+<span class="n">train_data</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;train_data_2&#39;</span><span class="p">)</span>
+<span class="n">test_data</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;test_data_2&#39;</span><span class="p">)</span>
+<span class="n">train_data</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">test_data</span><span class="o">.</span><span class="n">shape</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[14]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>(torch.Size([50000, 3, 32, 32]), torch.Size([10000, 3, 32, 32]))</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Build-and-train">Build and train<a class="anchor-link" href="#Build-and-train"></a></h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[15]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># A 2-dimensional CNN is used as this typically performs best with 2D image data</span>
+
+<span class="k">class</span> <span class="nc">Conv_NN</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_channels</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">cnn_layers</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+            <span class="c1"># Define a 2D convolution layer</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="n">in_channels</span> <span class="o">=</span> <span class="n">n_channels</span><span class="p">,</span> <span class="n">out_channels</span> <span class="o">=</span> <span class="mi">16</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="mi">16</span><span class="p">),</span> <span class="c1"># Batch normalisation standardises inputs to improve training performance</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="c1"># Using the same activation function as with the Simple NN</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">MaxPool2d</span><span class="p">(</span><span class="n">kernel_size</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span> <span class="c1"># Max pooling to help extract sharp features e.g. edges</span>
+            <span class="c1"># Define another 2D convolution layer</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="mi">8</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">AvgPool2d</span><span class="p">(</span><span class="n">kernel_size</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="c1"># Average pooling to help extract smooth image features</span>
+        <span class="p">)</span>
+        
+        <span class="c1"># Add linear layers to get to 10 outputs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">linear_layers</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Flatten</span><span class="p">(),</span> <span class="c1"># Flatten the input</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Define the forward function</span>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cnn_layers</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">linear_layers</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">x</span>    
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[16]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Instantiate the model and check the steps</span>
+<span class="n">net</span> <span class="o">=</span> <span class="n">Conv_NN</span><span class="p">(</span><span class="n">n_channels</span> <span class="o">=</span> <span class="mi">3</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">net</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Conv_NN(
+  (cnn_layers): Sequential(
+    (0): Conv2d(3, 16, kernel_size=(4, 4), stride=(1, 1))
+    (1): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (2): ReLU(inplace=True)
+    (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+    (4): Conv2d(16, 8, kernel_size=(4, 4), stride=(1, 1))
+    (5): BatchNorm2d(8, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (6): ReLU(inplace=True)
+    (7): AvgPool2d(kernel_size=2, stride=2, padding=0)
+  )
+  (linear_layers): Sequential(
+    (0): Flatten(start_dim=1, end_dim=-1)
+    (1): Linear(in_features=200, out_features=100, bias=True)
+    (2): ReLU(inplace=True)
+    (3): Linear(in_features=100, out_features=10, bias=True)
+  )
+)
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[17]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Push processing onto GPU if available</span>
+<span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">():</span>
+    <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cuda:0&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;running on the GPU&quot;</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;running on the CPU&quot;</span><span class="p">)</span>
+
+<span class="n">net</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>running on the CPU
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[17]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>Conv_NN(
+  (cnn_layers): Sequential(
+    (0): Conv2d(3, 16, kernel_size=(4, 4), stride=(1, 1))
+    (1): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (2): ReLU(inplace=True)
+    (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+    (4): Conv2d(16, 8, kernel_size=(4, 4), stride=(1, 1))
+    (5): BatchNorm2d(8, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (6): ReLU(inplace=True)
+    (7): AvgPool2d(kernel_size=2, stride=2, padding=0)
+  )
+  (linear_layers): Sequential(
+    (0): Flatten(start_dim=1, end_dim=-1)
+    (1): Linear(in_features=200, out_features=100, bias=True)
+    (2): ReLU(inplace=True)
+    (3): Linear(in_features=100, out_features=10, bias=True)
+  )
+)</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[18]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Define loss function and optimizer</span>
+<span class="n">loss_function</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">CrossEntropyLoss</span><span class="p">()</span>
+<span class="n">optimizer</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[19]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">epochs</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">BATCH_SIZE</span> <span class="o">=</span> <span class="mi">25</span>
+<span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span> <span class="p">(</span><span class="n">epochs</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">train_data</span><span class="p">),</span> <span class="n">BATCH_SIZE</span><span class="p">)):</span> <span class="c1"># Use tqdm to show progress bars</span>
+        <span class="c1"># Batch the data</span>
+        <span class="n">batch_data</span> <span class="o">=</span> <span class="n">train_data</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">BATCH_SIZE</span><span class="p">]</span>
+        <span class="n">batch_labels</span> <span class="o">=</span> <span class="n">train_labels</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">BATCH_SIZE</span><span class="p">]</span>
+        <span class="n">batch_data</span> <span class="o">=</span> <span class="n">batch_data</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">batch_labels</span> <span class="o">=</span> <span class="n">batch_labels</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+        
+        <span class="n">net</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>  <span class="c1"># Set gradients to 0 before loss calculation</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">net</span><span class="p">(</span><span class="n">batch_data</span><span class="p">)</span>  <span class="c1"># Pass in the batch</span>
+        
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">loss_function</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">batch_labels</span><span class="p">)</span>  <span class="c1"># Calculate the loss value</span>
+        <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>  <span class="c1"># Apply the loss backwards through the network&#39;s parameters</span>
+        <span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>  <span class="c1"># Optimize weights to account for loss/gradients</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="n">loss</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>  0%|          | 0/2000 [00:00&lt;?, ?it/s]/home/fj/anaconda3/lib/python3.8/site-packages/torch/nn/functional.py:718: UserWarning: Named tensors and all their associated APIs are an experimental feature and subject to change. Please do not use them for anything important until they are released as stable. (Triggered internally at  /opt/conda/conda-bld/pytorch_1623448216815/work/c10/core/TensorImpl.h:1156.)
+  return torch.max_pool2d(input, kernel_size, stride, padding, dilation, ceil_mode)
+100%|██████████| 2000/2000 [00:32&lt;00:00, 62.46it/s]
+  0%|          | 6/2000 [00:00&lt;00:37, 53.71it/s]</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>tensor(1.4888, grad_fn=&lt;NllLossBackward&gt;)
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>100%|██████████| 2000/2000 [00:31&lt;00:00, 63.64it/s]
+  0%|          | 6/2000 [00:00&lt;00:36, 54.47it/s]</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>tensor(1.1524, grad_fn=&lt;NllLossBackward&gt;)
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>100%|██████████| 2000/2000 [00:32&lt;00:00, 61.95it/s]
+  0%|          | 5/2000 [00:00&lt;00:47, 42.37it/s]</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>tensor(1.0947, grad_fn=&lt;NllLossBackward&gt;)
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>100%|██████████| 2000/2000 [00:36&lt;00:00, 55.32it/s]
+  0%|          | 5/2000 [00:00&lt;00:44, 44.74it/s]</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>tensor(1.0893, grad_fn=&lt;NllLossBackward&gt;)
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>100%|██████████| 2000/2000 [00:33&lt;00:00, 59.75it/s]
+  0%|          | 5/2000 [00:00&lt;00:46, 42.51it/s]</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>tensor(1.0842, grad_fn=&lt;NllLossBackward&gt;)
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>100%|██████████| 2000/2000 [00:32&lt;00:00, 61.29it/s]
+  0%|          | 4/2000 [00:00&lt;00:49, 39.99it/s]</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>tensor(1.1312, grad_fn=&lt;NllLossBackward&gt;)
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>100%|██████████| 2000/2000 [00:31&lt;00:00, 62.90it/s]
+  0%|          | 6/2000 [00:00&lt;00:33, 59.88it/s]</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>tensor(1.1653, grad_fn=&lt;NllLossBackward&gt;)
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>100%|██████████| 2000/2000 [00:32&lt;00:00, 62.20it/s]
+  0%|          | 5/2000 [00:00&lt;00:40, 49.60it/s]</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>tensor(1.1587, grad_fn=&lt;NllLossBackward&gt;)
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>100%|██████████| 2000/2000 [00:31&lt;00:00, 63.65it/s]
+  0%|          | 4/2000 [00:00&lt;00:51, 39.06it/s]</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>tensor(1.1236, grad_fn=&lt;NllLossBackward&gt;)
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>100%|██████████| 2000/2000 [00:32&lt;00:00, 60.61it/s]</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>tensor(1.1089, grad_fn=&lt;NllLossBackward&gt;)
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Predict">Predict<a class="anchor-link" href="#Predict"></a></h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[20]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Use the model to predict from the test set</span>
+<span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+    <span class="n">predicted</span> <span class="o">=</span> <span class="n">net</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">test_data</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">))</span>
+    <span class="n">predicted_classes</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">predicted</span><span class="p">,</span> <span class="n">dim</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
+    
+    <span class="c1"># The model seems to predict well with fewer mistakes</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">predicted_classes</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">10</span><span class="p">])</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">test_labels</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">10</span><span class="p">])</span>
+    
+<span class="c1"># Push data back onto CPU for further analysis</span>
+<span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s1">&#39;cpu&#39;</span><span class="p">)</span>
+<span class="n">predicted_classes</span> <span class="o">=</span> <span class="n">predicted_classes</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+<span class="n">test_labels</span> <span class="o">=</span> <span class="n">test_labels</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>tensor([3, 8, 8, 0, 6, 6, 1, 6, 3, 9])
+tensor([3, 8, 8, 0, 6, 6, 1, 6, 3, 1])
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[21]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Find accuracy metric for prediction on test set</span>
+<span class="n">correct</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">predicted_classes</span><span class="p">)):</span>
+
+    <span class="k">if</span> <span class="n">predicted_classes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">test_labels</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+        <span class="n">correct</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">total</span> <span class="o">+=</span> <span class="mi">1</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Accuracy: &quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">correct</span><span class="o">/</span><span class="n">total</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Accuracy:  0.638
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[22]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">confusion_matrix</span>
+<span class="n">confusion_matrix</span><span class="p">(</span><span class="n">test_labels</span><span class="p">,</span> <span class="n">predicted_classes</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[22]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>array([[653,  29,  70,  21,  29,   5,  10,  15, 121,  47],
+       [ 27, 790,  13,   3,   7,   5,  12,   5,  39,  99],
+       [ 70,  13, 482,  62, 117,  59,  99,  61,  23,  14],
+       [ 25,  20,  86, 396, 115, 121, 121,  72,  22,  22],
+       [ 21,  12,  81,  52, 575,  18, 108, 106,  20,   7],
+       [ 17,   7,  88, 206,  61, 440,  54, 109,   9,   9],
+       [  6,   4,  36,  42,  42,  13, 832,  10,  10,   5],
+       [ 22,   8,  37,  42,  71,  40,  19, 735,   2,  24],
+       [ 90,  63,  11,  27,  13,   3,  10,   7, 728,  48],
+       [ 34,  87,   7,  10,   9,   2,  17,  35,  51, 748]])</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The convolutional model has given a good increase over the simple NN, now up to 64% accuracy. It appears that classes 2, 3, and 4 were more difficult to classify, showing misclassifications into several classes. Also, there are noticeable peaks in misclassification where class 8 and class 0 have been misclassified as each other, as were classes 5 and 3, and classes 9 and 1. This suggests there may be some common features between these class pairs that the model is identifying and causing the misclassifications observed.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Conclusion">Conclusion<a class="anchor-link" href="#Conclusion"></a></h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Both models performed fairly well once optimized. One noticeable issue worth mentioning with the simple NN was the learning rate used, which was relatively high. Looking at the error values, after a certain number of epochs we saw that learning rates actually increased slightly, and the final model did not have the lowest error of all the epochs. This would suggest that the model was overadjusting in gradient descent and overshooting the minimum error of the model. However, the higher learning rate did bring the error down quickly in earlier epochs, so a stepped learning rate could be useful here, e.g. by using the StepLR or MultiStepLR function in the optimizer. Alternatively, it appears that a learning rate schedule that uses decay or momentum, e.g. the Adam optimizer, could significantly benefit this model in helping it to converge.</p>
+<p>This strategy could also be applied to the CNN to hone in on a minimum for the error function. However, the CNN was significantly reducing error over each epoch, so a first strategy to improving the CNN model may simply be to run more epochs, with the possible addition of a more complex learning rate schedule.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="References">References<a class="anchor-link" href="#References"></a></h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>1) <a href="https://www.freecodecamp.org/news/an-intuitive-guide-to-convolutional-neural-networks-260c2de0a050/">https://www.freecodecamp.org/news/an-intuitive-guide-to-convolutional-neural-networks-260c2de0a050/</a><br>
+2) <a href="https://www.analyticsvidhya.com/blog/2019/10/building-image-classification-models-cnn-pytorch/">https://www.analyticsvidhya.com/blog/2019/10/building-image-classification-models-cnn-pytorch/</a><br>
+3) <a href="https://pytorch.org/docs/stable/generated/torch.nn.Module.html">https://pytorch.org/docs/stable/generated/torch.nn.Module.html</a><br>
+4) <a href="https://www.geeksforgeeks.org/adjusting-learning-rate-of-a-neural-network-in-pytorch/">https://www.geeksforgeeks.org/adjusting-learning-rate-of-a-neural-network-in-pytorch/</a></p>
+
+</div>
+</div>
+</div>
+    </div>
+  </div>
+</body>
